@@ -49,7 +49,7 @@ export default function InputArea({ onSend }: InputAreaProps) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="输入最近发生的一件事，呼叫赛博战友来锐评..."
+            placeholder="输入最近发生的一件事，赛博战友来锐评..."
             className="w-full p-6 text-xl font-bold resize-none outline-none min-h-[120px] bg-transparent placeholder:text-gray-400 leading-relaxed"
           />
           

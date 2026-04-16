@@ -34,6 +34,7 @@ export default function CyberComradeApp() {
       console.error(e);
       // Fallback for demo or when API fails
       setResultData({
+        original_input: text,
         status: "夯爆了",
         quote: "这破烂世界终于给你发福利了！拿好这波天降富贵，出去吃顿好的！",
         radar_stats: {

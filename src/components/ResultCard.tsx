@@ -35,11 +35,23 @@ export default function ResultCard({ data, onReset }: { data: ResultData; onRese
   const handleSave = async () => {
     if (cardRef.current) {
       try {
+        // 在截屏前，临时移除 hidden 类，显示原始输入
+        const inputBlock = cardRef.current.querySelector('#original-input-block') as HTMLElement;
+        if (inputBlock) {
+          inputBlock.style.display = 'block';
+        }
+
         const dataUrl = await toPng(cardRef.current, {
           quality: 1,
           pixelRatio: 2,
           style: { transform: "none", margin: "0" },
         });
+
+        // 截屏后，恢复隐藏状态
+        if (inputBlock) {
+          inputBlock.style.display = 'none';
+        }
+
         const link = document.createElement("a");
         link.download = `赛博战友-${data.status}.png`;
         link.href = dataUrl;
@@ -78,8 +90,26 @@ export default function ResultCard({ data, onReset }: { data: ResultData; onRese
           </div>
         </div>
 
+        {/* 原始输入引言 (默认隐藏，仅截图时显示) */}
+        <div 
+          id="original-input-block"
+          className="mb-4 p-4 bg-gray-100 border-4 border-dashed border-gray-300 rounded-xl relative"
+          style={{ display: 'none' }}
+        >
+          <div className="absolute -top-3 left-4 bg-white px-2 text-sm font-black text-gray-500">
+            {isGood ? "高光时刻" : "荒诞事件"}
+          </div>
+          <p className="text-gray-700 font-bold">
+            {data.original_input}
+          </p>
+        </div>
+
+        {/* AI 锐评 */}
         <div className="mb-6 relative">
-          <div className="absolute -left-4 top-0 bottom-0 w-2 bg-black" />
+          <div className={cn(
+            "absolute -left-4 top-0 bottom-0 w-2",
+            isGood ? "bg-[#00ff88]" : "bg-black"
+          )} />
           <p className="text-2xl font-bold leading-relaxed pl-4">
             &quot;{data.quote}&quot;
           </p>
@@ -153,9 +183,8 @@ export default function ResultCard({ data, onReset }: { data: ResultData; onRese
           })}
         </div>
 
-        <div className="mt-4 pt-4 border-t-4 border-dashed border-black flex justify-between items-center text-sm font-black uppercase">
+        <div className="mt-4 pt-4 border-t-4 border-dashed border-black flex justify-start items-center text-sm font-black uppercase">
           <span>@赛博战友</span>
-          <span>扫描获取情绪代偿</span>
         </div>
       </div>
 

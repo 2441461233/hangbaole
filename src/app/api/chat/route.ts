@@ -43,6 +43,8 @@ export async function POST(req: Request) {
     }
     
     const object = JSON.parse(content);
+    // 把用户的原始输入透传回去，前端需要用于展示
+    object.original_input = prompt;
 
     return Response.json(object);
   } catch (error) {
