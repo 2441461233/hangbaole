@@ -37,12 +37,39 @@ export async function POST(req: Request) {
     const data = await response.json();
     let content = data.choices[0].message.content;
     
-    // MiniMax 有时候可能会带上 Markdown 的 json 标签，需要清洗掉
-    if (content.startsWith('```json')) {
-      content = content.replace(/^```json\n?/, '').replace(/```$/, '').trim();
+    let jsonStr = content.trim();
+    
+    // 尝试剥离 markdown 代码块
+    const markdownMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (markdownMatch) {
+      jsonStr = markdownMatch[1].trim();
+    } else {
+      // 否则尝试截取第一个 { 到最后一个 }
+      const firstBrace = jsonStr.indexOf('{');
+      const lastBrace = jsonStr.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace >= firstBrace) {
+        jsonStr = jsonStr.substring(firstBrace, lastBrace + 1);
+      }
     }
     
-    const object = JSON.parse(content);
+    let object;
+    try {
+      object = JSON.parse(jsonStr);
+    } catch (e) {
+      // 极端情况兜底：如果 AI 完全没有返回 JSON，而是直接返回了纯文本
+      console.warn("AI 根本没有返回 JSON，尝试使用纯文本兜底");
+      object = {
+        status: "拉完了",
+        quote: content.substring(0, 50) || "你的键盘是按字收费的吗？多打几个字让我帮你发疯！",
+        radar_stats: {
+          hangla: { score: 1, badge: "无法解析你的脑电波", reason: "输入太少或者AI罢工了" },
+          caotai: { score: 99, badge: "草台班子系统崩溃", reason: "这个破系统连个JSON都吐不出来，草台班子实锤了！" },
+          probability: { score: 1, badge: "万里挑一的Bug体质", reason: "别人输入都正常，就你输入把AI干碎了。" },
+          compensation: { score: 100, badge: "¥1个亿", reason: "系统崩溃的精神损失费，不过只能在梦里兑现。" },
+          reversal: { score: 10, badge: "反转失败", reason: "赶紧多写几个字重试一下吧！" }
+        }
+      };
+    }
     // 把用户的原始输入透传回去，前端需要用于展示
     object.original_input = prompt;
 

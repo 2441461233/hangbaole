@@ -44,7 +44,14 @@ export default function ResultCard({ data, onReset }: { data: ResultData; onRese
         const dataUrl = await toPng(cardRef.current, {
           quality: 1,
           pixelRatio: 2,
-          style: { transform: "none", margin: "0" },
+          skipFonts: true, // 防止字体加载导致的计算偏移
+          style: { 
+            transform: "scale(1)", 
+            transformOrigin: "top left",
+            width: `${cardRef.current.offsetWidth}px`,
+            height: `${cardRef.current.offsetHeight}px`,
+            margin: "0" 
+          },
         });
 
         // 截屏后，恢复隐藏状态
@@ -101,11 +108,12 @@ export default function ResultCard({ data, onReset }: { data: ResultData; onRese
           </div>
           <div 
             className={cn(
-              "px-4 py-2 border-4 border-black font-black text-2xl transform rotate-3",
+              "px-4 py-2 border-4 border-black font-black text-2xl transform rotate-3 flex items-center gap-2",
               isGood ? "bg-[#00ff88] text-black" : "bg-black text-white"
             )}
           >
-            {data.status}
+            <span>{isGood ? "🔥" : "😅"}</span>
+            <span>{data.status}</span>
           </div>
         </div>
 
@@ -146,7 +154,7 @@ export default function ResultCard({ data, onReset }: { data: ResultData; onRese
         
         {/* 维度详细说明（诊断报告） */}
         <div className="flex flex-col gap-2 mb-2">
-          {Object.entries(data.radar_stats).map(([key, stat]) => {
+          {data.radar_stats && Object.entries(data.radar_stats).map(([key, stat]) => {
             if (!stat) return null;
             
             const labels: Record<string, string> = {
@@ -166,10 +174,8 @@ export default function ResultCard({ data, onReset }: { data: ResultData; onRese
             return (
               <div 
                 key={key} 
-                className="border-b-2 border-dashed border-gray-300 pb-2 last:border-0 cursor-pointer select-none group"
+                className="border-b-2 border-dashed border-gray-300 pb-2 last:border-0 cursor-pointer select-none group relative"
                 onClick={() => setExpandedKey(isExpanded ? null : key)}
-                onMouseEnter={() => setExpandedKey(key)}
-                onMouseLeave={() => setExpandedKey(null)}
               >
                 <div className="flex justify-between items-center text-sm">
                   <span className="font-black whitespace-nowrap">{labels[key]}</span>
@@ -188,14 +194,16 @@ export default function ResultCard({ data, onReset }: { data: ResultData; onRese
                     </span>
                   </div>
                 </div>
-                {/* 展开的吐槽详情 */}
+                {/* 展开的吐槽详情：采用绝对定位 (absolute) 和高层级 (z-50) 悬浮显示，绝不撑开外层高度，避免背景抖动 */}
                 <div 
                   className={cn(
-                    "mt-2 text-sm font-bold text-gray-800 bg-[#ffde59] p-3 rounded-xl border-2 border-black transition-all duration-200",
-                    isExpanded ? "block animate-in fade-in slide-in-from-top-1" : "hidden"
+                    "absolute left-0 top-full w-full z-50 pointer-events-none transition-all duration-200 origin-top",
+                    isExpanded ? "opacity-100 scale-y-100 translate-y-1" : "opacity-0 scale-y-0 -translate-y-2 md:group-hover:opacity-100 md:group-hover:scale-y-100 md:group-hover:translate-y-1"
                   )}
                 >
-                  &quot;{stat.reason}&quot;
+                  <div className="text-sm font-bold text-gray-800 bg-[#ffde59] p-3 rounded-xl border-2 border-black shadow-comic-sm">
+                    &quot;{stat.reason}&quot;
+                  </div>
                 </div>
               </div>
             );
