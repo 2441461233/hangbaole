@@ -11,6 +11,11 @@ export async function POST(req: Request) {
   try {
     const { prompt } = await req.json();
 
+    // 简单无痛的后台计数（不等待结果，不影响主流程耗时）
+    fetch('https://api.counterapi.dev/v1/cybercomrade/requests/up').catch(() => {
+      // 忽略请求计数失败的情况，避免影响业务
+    });
+
     // 因为各家厂商（特别是 MiniMax）对 OpenAI schema 的支持不一定 100% 兼容 Vercel AI SDK 的 object-generation，
     // 我们这里直接通过原生的 fetch 发起调用，确保它一定能跑通。
     const response = await fetch(`${baseURL}/chat/completions`, {
