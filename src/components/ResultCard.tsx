@@ -52,6 +52,25 @@ export default function ResultCard({ data, onReset }: { data: ResultData; onRese
           inputBlock.style.display = 'none';
         }
 
+        // 尝试转换为 File 对象以供原生分享/保存使用
+        try {
+          const blob = await (await fetch(dataUrl)).blob();
+          const file = new File([blob], `赛博战友-${data.status}.png`, { type: "image/png" });
+
+          // 如果支持 Web Share API 且支持分享文件（通常是移动端，会弹出系统原生菜单，包含“保存到相册”权限请求）
+          if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: "赛博诊断书",
+              text: "快来看看我的赛博诊断书！"
+            });
+            return; // 成功后退出，不再执行传统下载
+          }
+        } catch (shareErr) {
+          console.log("原生分享/保存不可用，降级为普通下载", shareErr);
+        }
+
+        // 降级：传统的 Web <a> 标签下载（桌面端或不支持 share API 的环境）
         const link = document.createElement("a");
         link.download = `赛博战友-${data.status}.png`;
         link.href = dataUrl;
