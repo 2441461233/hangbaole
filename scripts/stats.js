@@ -1,9 +1,8 @@
-const namespace = 'cybercomrade';
-const key = 'requests';
+const key = 'cybercomrade_requests';
 
 async function getStats() {
   try {
-    const res = await fetch(`https://api.counterapi.dev/v1/${namespace}/${key}/`);
+    const res = await fetch(`https://countapi.mileshilliard.com/api/v1/get/${key}`);
     
     if (!res.ok) {
       if (res.status === 404) {
@@ -21,8 +20,7 @@ async function getStats() {
     console.log('\n================================');
     console.log('🤖 赛博战友 - 项目请求量统计 🤖');
     console.log('================================');
-    console.log(`🔥 已经被赛博气运折磨了：\x1b[32m${data.count}\x1b[0m 次`);
-    console.log(`🕒 最后一次发疯时间：${new Date(data.updated_at).toLocaleString()}`);
+    console.log(`🔥 已经被赛博气运折磨了：\x1b[32m${data.value}\x1b[0m 次`);
     console.log('================================\n');
 
   } catch (error) {

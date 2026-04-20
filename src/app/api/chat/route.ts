@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const { prompt } = await req.json();
 
     // 简单无痛的后台计数（不等待结果，不影响主流程耗时）
-    fetch('https://api.counterapi.dev/v1/cybercomrade/requests/up').catch(() => {
+    fetch('https://countapi.mileshilliard.com/api/v1/hit/cybercomrade_requests').catch(() => {
       // 忽略请求计数失败的情况，避免影响业务
     });
 
